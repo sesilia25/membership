@@ -3,6 +3,7 @@ import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { HomeIcon, InformationCircleIcon } from "react-native-heroicons/solid";
 import HomeScreen from "../screens/owner/HomeScreen";
 import WelcomeScreen from "../screens/WelcomeScreen";
 import LoginScreen from "../screens/LoginScreen";
@@ -23,14 +24,59 @@ const Tab = createBottomTabNavigator();
 // Admin Tabs
 const AdminTabs = () => {
   return (
-    <Tab.Navigator>
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Validation" component={ValidationScreen} />
-      <Tab.Screen name="History" component={HistoryScreen} />
-      <Tab.Screen name="Settings" component={SettingsScreen} />
+    <Tab.Navigator
+      tabBarOptions={{
+        activeTintColor: "yellow",
+      }}
+    >
+      <Tab.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{
+          headerShown: false,
+          tabBarLabel: "Beranda",
+          tabBarIcon: ({ color, size }) => (
+            <HomeIcon name="home" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Validation"
+        component={ValidationScreen}
+        options={{
+          headerShown: false,
+          tabBarLabel: "Validasi",
+          tabBarIcon: ({ color, size }) => (
+            <HomeIcon name="checkmark" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="History"
+        component={HistoryScreen}
+        options={{
+          headerShown: false,
+          tabBarLabel: "Riwayat",
+          tabBarIcon: ({ color, size }) => (
+            <HomeIcon name="time" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{
+          headerShown: false,
+          tabBarLabel: "Pengaturan",
+          tabBarIcon: ({ color, size }) => (
+            <HomeIcon name="settings" color={color} size={size} />
+          ),
+        }}
+      />
     </Tab.Navigator>
   );
 };
+
 export default function AppNavigation() {
   const { user } = useAuth();
 
