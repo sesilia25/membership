@@ -1,6 +1,9 @@
 import { View, Text, TouchableOpacity } from "react-native";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Cash from "../../components/validation/Cash";
+import Transfer from "../../components/validation/Transfer";
+import { cash } from "../../utils/data";
 
 export default function ValidationScreen() {
   const [isCash, setIsCash] = useState(false);
@@ -41,6 +44,33 @@ export default function ValidationScreen() {
               Transfer
             </Text>
           </TouchableOpacity>
+        </View>
+        <View>
+          {isCash ? (
+            <>
+              <View>
+                {cash.map((item) => (
+                  <Cash
+                    date={item.amount}
+                    status={item.status}
+                    amount={item.date}
+                  />
+                ))}
+              </View>
+            </>
+          ) : (
+            <>
+              <View>
+                {cash.map((item) => (
+                  <Transfer
+                    date={item.amount}
+                    status={item.status}
+                    amount={item.date}
+                  />
+                ))}
+              </View>
+            </>
+          )}
         </View>
       </SafeAreaView>
     </View>

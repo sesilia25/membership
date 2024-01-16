@@ -3,7 +3,13 @@ import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { HomeIcon, InformationCircleIcon } from "react-native-heroicons/solid";
+import {
+  HomeIcon,
+  InformationCircleIcon,
+  Cog8ToothIcon,
+  ArrowPathIcon,
+  CheckIcon,
+} from "react-native-heroicons/solid";
 import HomeScreen from "../screens/owner/HomeScreen";
 import WelcomeScreen from "../screens/WelcomeScreen";
 import LoginScreen from "../screens/LoginScreen";
@@ -47,7 +53,7 @@ const AdminTabs = () => {
           headerShown: false,
           tabBarLabel: "Validasi",
           tabBarIcon: ({ color, size }) => (
-            <HomeIcon name="checkmark" color={color} size={size} />
+            <CheckIcon name="checkmark" color={color} size={size} />
           ),
         }}
       />
@@ -58,7 +64,7 @@ const AdminTabs = () => {
           headerShown: false,
           tabBarLabel: "Riwayat",
           tabBarIcon: ({ color, size }) => (
-            <HomeIcon name="time" color={color} size={size} />
+            <ArrowPathIcon name="time" color={color} size={size} />
           ),
         }}
       />
@@ -69,7 +75,7 @@ const AdminTabs = () => {
           headerShown: false,
           tabBarLabel: "Pengaturan",
           tabBarIcon: ({ color, size }) => (
-            <HomeIcon name="settings" color={color} size={size} />
+            <Cog8ToothIcon name="settings" color={color} size={size} />
           ),
         }}
       />

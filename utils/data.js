@@ -112,3 +112,31 @@ export const packages = [
     price: "Rp. 600.000",
   },
 ];
+
+export const users = [
+  {
+    id: "1",
+    name: "Sesilia",
+    date: "16 Januari 2023",
+  },
+  {
+    id: "2",
+    name: "Sesilia",
+    date: "16 Januari 2023",
+  },
+];
+
+export const cash = [
+  {
+    id: "1",
+    date: "16 Januari 2023",
+    amount: "Rp. 300.000",
+    status: "Paid",
+  },
+  {
+    id: "2",
+    date: "16 Januari 2023",
+    amount: "Rp. 300.000",
+    status: "Unpaid",
+  },
+];
