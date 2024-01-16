@@ -10,6 +10,8 @@ import {
   doc,
 } from "firebase/firestore";
 import { XCircleIcon } from "react-native-heroicons/solid";
+import { signOut } from "firebase/auth";
+import { auth } from "../../config/firebase";
 
 export default function SettingsScreen() {
   const firestore = getFirestore(app);
@@ -17,6 +19,14 @@ export default function SettingsScreen() {
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [price, setPrice] = useState(0);
   const [editingPackageId, setEditingPackageId] = useState(null);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -78,7 +88,7 @@ export default function SettingsScreen() {
         <Text className="text-2xl font-bold">Pengaturan</Text>
         <Text className="mt-4 text-xl font-semibold">Set Harga</Text>
       </SafeAreaView>
-      <View className="flex-col p-4 space-y-2">
+      <View className="flex-col mt-2 space-y-2">
         {packages.map((item) => (
           <View
             className="flex flex-row items-center w-full space-x-2"
@@ -148,6 +158,13 @@ export default function SettingsScreen() {
           </View>
         </View>
       </Modal>
+
+      <TouchableOpacity
+        onPress={handleLogout}
+        className="w-full mt-3 rounded-lg p-3  text-yellow-500 border-[1px] border-yellow-500 bg-white"
+      >
+        <Text className="text-center text-yellow-500 uppercase">Keluar</Text>
+      </TouchableOpacity>
     </View>
   );
 }
