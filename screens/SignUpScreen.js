@@ -25,7 +25,6 @@ import {
   setDoc,
 } from "firebase/firestore";
 
-// Function to add user data to Firestore using UID as the document ID
 const addUserDataToFirestore = async (uid, userData) => {
   const db = getFirestore();
   const userRef = doc(db, "users", uid);
