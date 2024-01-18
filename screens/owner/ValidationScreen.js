@@ -1,12 +1,40 @@
 import { View, Text, TouchableOpacity } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Cash from "../../components/validation/Cash";
 import Transfer from "../../components/validation/Transfer";
 import { cash } from "../../utils/data";
+import { app } from "../../config/firebase";
+import { getFirestore, collection, getDocs } from "firebase/firestore";
 
 export default function ValidationScreen() {
   const [isCash, setIsCash] = useState(false);
+  const firestore = getFirestore(app);
+  const [data, setData] = useState([]);
+
+  const fetchData = async () => {
+    try {
+      const querySnapshot = await getDocs(
+        collection(firestore, "transactions")
+      );
+      const data = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      const filter = isCash ? "CASH" : "TRANSFER";
+      const filteredData = data.filter(
+        (item) => item.proofOfTransfer === filter
+      );
+      setData(filteredData);
+    } catch (error) {
+      console.error("Error fetching users: ", error);
+      // Handle error accordingly
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [firestore, isCash]);
   return (
     <View className="flex-1 p-4 bg-white">
       <SafeAreaView>
@@ -49,11 +77,11 @@ export default function ValidationScreen() {
           {isCash ? (
             <>
               <View>
-                {cash.map((item) => (
+                {data.map((item) => (
                   <Cash
-                    date={item.amount}
-                    status={item.status}
-                    amount={item.date}
+                    price={item?.price}
+                    fullName={item?.fullName}
+                    package_={item?.package}
                   />
                 ))}
               </View>
@@ -61,11 +89,12 @@ export default function ValidationScreen() {
           ) : (
             <>
               <View>
-                {cash.map((item) => (
+                {data.map((item) => (
                   <Transfer
-                    date={item.amount}
-                    status={item.status}
-                    amount={item.date}
+                    price={item?.price}
+                    fullName={item?.fullName}
+                    package_={item?.package}
+                    proofOfTransferImage={item?.urlImage}
                   />
                 ))}
               </View>

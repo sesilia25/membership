@@ -16,14 +16,17 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import Dropdown from "react-native-input-select";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { auth } from "../config/firebase";
+import { auth, storage } from "../config/firebase";
 import {
   getFirestore,
   collection,
   addDoc,
   doc,
   setDoc,
+  updateDoc,
 } from "firebase/firestore";
+import * as ImagePicker from "expo-image-picker";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const addUserDataToFirestore = async (uid, userData) => {
   const db = getFirestore();
@@ -36,7 +39,17 @@ const addUserDataToFirestore = async (uid, userData) => {
   }
 };
 
-// subscribe for more videos like this :)
+const addTransaction = async (transactionData) => {
+  const db = getFirestore();
+  const transactionRef = collection(db, "transactions");
+
+  try {
+    await addDoc(transactionRef, transactionData);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 export default function SignUpScreen() {
   const navigation = useNavigation();
   const [fullName, setFullName] = useState("");
@@ -44,11 +57,41 @@ export default function SignUpScreen() {
   const [password, setPassword] = useState("");
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [proofOfTransfer, setProofOfTransfer] = useState("");
+  const [proofOfTransferImage, setProofOfTransferImage] = useState(null);
+
+  const selectProofOfTransferImage = async () => {
+    try {
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
+
+      if (!result.canceled) {
+        setProofOfTransferImage(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error("Error launching image library:", error.message);
+    }
+  };
+
+  const calculatePrice = (packageType) => {
+    const prices = {
+      "MEMBER 1 BULAN": "325000",
+      "MEMBER 3 BULAN": "900000",
+      "MEMBER 6 BULAN": "1700000",
+      "MEMBER 12 BULAN": "3000000",
+    };
+
+    return prices[packageType] || "0";
+  };
 
   const handleRegister = async () => {
     if (email && password) {
       try {
-        // Create a new user with email and password
+        // Create user with email and password
         const response = await createUserWithEmailAndPassword(
           auth,
           email,
@@ -57,13 +100,42 @@ export default function SignUpScreen() {
 
         const user = response.user;
 
+        // Update user profile with display name
         await updateProfile(user, {
           displayName: fullName,
         });
 
+        // Add user data to Firestore
         await addUserDataToFirestore(user.uid, {
           role: "member",
           fullName: fullName,
+          email: email,
+          selectedPackage: selectedPackage,
+          dateMember: null,
+        });
+
+        let downloadURL = null;
+
+        if (proofOfTransfer === "TRANSFER" && proofOfTransferImage) {
+          // Generate a unique identifier (timestamp in this case)
+          const timestamp = new Date().getTime();
+
+          const storageRef = ref(storage, `proofOfTransferImages/${timestamp}`);
+          const response = await uploadBytes(storageRef, proofOfTransferImage);
+          await getDownloadURL(response.ref).then((url) => {
+            downloadURL = url;
+          });
+        }
+
+        // Add transaction to Firestore
+        await addTransaction({
+          userId: user.uid,
+          fullName: fullName,
+          price: calculatePrice(selectedPackage),
+          package: selectedPackage,
+          proofOfTransfer: proofOfTransfer,
+          urlImage: downloadURL, // Set the downloadURL here
+          isValid: "PENDING",
         });
 
         console.log("Registration successful:", user);
@@ -72,7 +144,6 @@ export default function SignUpScreen() {
       }
     }
   };
-
   return (
     <View
       className="flex-1 bg-white"
@@ -133,17 +204,10 @@ export default function SignUpScreen() {
               className="p-4 text-gray-700 bg-gray-100 rounded-2xl mb-7"
               placeholder="Silihkan pilih paket"
               options={[
-                { label: "Visit Gym", value: "VISIT GYM" },
-                { label: "Visit Gym + Kolam", value: "VISIT GYM + KOLAM" },
-                { label: "Visit Sauna", value: "VISIT SAUNA" },
                 { label: "Member 1 bulan", value: "MEMBER 1 BULAN" },
                 { label: "Member 3 bulan", value: "MEMBER 3 BULAN" },
                 { label: "Member 6 bulan", value: "MEMBER 6 BULAN" },
                 { label: "Member 12 bulan", value: "MEMBER 12 BULAN" },
-                {
-                  label: "Member 1 bulan Gym + Sauna",
-                  value: "MEMBER 1 BULAN GYM + SAUNA",
-                },
               ]}
               primaryColor={"green"}
               onValueChange={(itemValue) => setSelectedPackage(itemValue)}
@@ -164,11 +228,30 @@ export default function SignUpScreen() {
             {proofOfTransfer === "TRANSFER" && (
               <>
                 <Text className="mb-3 text-gray-700">Bukti Transfer</Text>
-                <TextInput
-                  className="p-4 mb-3 text-gray-700 bg-gray-100 rounded-2xl"
-                  value="sesil@gmail.com"
-                  placeholder="Enter Email"
-                />
+                <TouchableOpacity
+                  onPress={() => selectProofOfTransferImage()}
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginBottom: 10,
+                  }}
+                >
+                  <Text style={{ color: "gray", marginRight: 10 }}>
+                    {proofOfTransferImage
+                      ? "Ubah Bukti Transfer"
+                      : "Pilih Bukti Transfer"}
+                  </Text>
+                  <Image
+                    // source={require("../assets/images/image_icon.png")}
+                    style={{ width: 20, height: 20 }}
+                  />
+                </TouchableOpacity>
+                {proofOfTransferImage && (
+                  <Image
+                    source={{ uri: proofOfTransferImage }}
+                    style={{ width: "100%", height: 200, resizeMode: "cover" }}
+                  />
+                )}
               </>
             )}
             <TouchableOpacity

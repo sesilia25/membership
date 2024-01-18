@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../config/firebase";
 import { doc, getDoc } from "firebase/firestore";
-import { db } from "../config/firebase"; // Import the Firestore db instance
+import { db } from "../config/firebase";
+import { useAuthContext } from "../context/useContext";
+import { auth } from "../config/firebase"; // Adjust the path accordingly
 
 export default function useAuth() {
-  const [user, setUser] = useState(null);
+  const { updateUser, clearUser } = useAuthContext();
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, async (authUser) => {
@@ -14,15 +15,10 @@ export default function useAuth() {
         if (userDoc.exists()) {
           const userData = userDoc.data();
           console.log(userData);
-          setUser({
-            uid: authUser.uid,
-            email: authUser.email,
-            fullName: userData.fullName,
-            role: userData.role,
-          });
+          updateUser(authUser, userData);
         }
       } else {
-        setUser(null);
+        clearUser();
       }
     });
 
@@ -31,7 +27,10 @@ export default function useAuth() {
     };
   }, []);
 
+  // You can omit the return statement, or keep it for any additional logic
+
+  // Example of returning user
   return {
-    user,
+    user: useAuthContext().user,
   };
 }

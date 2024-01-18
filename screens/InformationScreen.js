@@ -1,29 +1,40 @@
-import React, { useState } from "react";
-import {
-  View,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  Image,
-  TextInput,
-} from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, ScrollView, Text, TouchableOpacity } from "react-native";
 import { themeColors } from "../theme";
 import { SafeAreaView } from "react-native-safe-area-context";
-import {
-  ArrowLeftIcon,
-  InformationCircleIcon,
-} from "react-native-heroicons/solid";
+import { ArrowLeftIcon } from "react-native-heroicons/solid";
 import { useNavigation } from "@react-navigation/native";
-import { facilities, operationalHour, packages } from "../utils/data";
+import { facilities, operationalHour } from "../utils/data";
+import { app } from "../config/firebase";
+import { getFirestore, collection, getDocs } from "firebase/firestore";
 
 // subscribe for more videos like this :)
 export default function InformationScreen() {
   const navigation = useNavigation();
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [selectedPackage, setSelectedPackage] = useState(null);
-  const [proofOfTransfer, setProofOfTransfer] = useState("");
+  const firestore = getFirestore(app);
+  const [packages, setPackages] = useState([]);
+
+  const fetchData = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(firestore, "packages"));
+      const packagesData = [];
+
+      querySnapshot.forEach((doc) => {
+        // Include the document ID in the data
+        packagesData.push({ id: doc.id, ...doc.data() });
+      });
+
+      setPackages(packagesData);
+      setPrice("");
+    } catch (error) {
+      console.error("Error fetching users: ", error);
+      // Handle error accordingly
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [firestore]);
 
   return (
     <View

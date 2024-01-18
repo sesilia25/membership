@@ -22,6 +22,19 @@ export default function LoginScreen() {
         console.log(response.user);
       } catch (error) {
         console.log(error.message);
+
+        // Menambahkan pesan jika gagal masuk
+        if (
+          error.code === "auth/user-not-found" ||
+          error.code === "auth/wrong-password" ||
+          error.code === "auth/invalid-credential"
+        ) {
+          alert("Email atau kata sandi salah. Silakan coba lagi.");
+        } else {
+          alert(
+            "Gagal masuk. Silakan coba lagi atau periksa koneksi internet Anda."
+          );
+        }
       }
     }
   };
@@ -39,10 +52,10 @@ export default function LoginScreen() {
             <ArrowLeftIcon size="20" color="black" />
           </TouchableOpacity>
         </View>
-        <View className="flex-row justify-center">
+        <View className="flex-row justify-center mb-4">
           <Image
-            source={require("../assets/images/login.png")}
-            style={{ width: 200, height: 200 }}
+            source={require("../assets/icons/ic_get_started.png")}
+            style={{ width: 150, height: 150 }}
           />
         </View>
       </SafeAreaView>
