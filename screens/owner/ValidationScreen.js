@@ -28,7 +28,6 @@ export default function ValidationScreen() {
       setData(filteredData);
     } catch (error) {
       console.error("Error fetching users: ", error);
-      // Handle error accordingly
     }
   };
 
@@ -78,30 +77,46 @@ export default function ValidationScreen() {
           {isCash ? (
             <>
               <View>
-                {data.map((item) => (
-                  <Cash
-                    price={item?.price}
-                    fullName={item?.fullName}
-                    package_={item?.package}
-                    id={item?.id}
-                    userId={item?.userId}
-                  />
-                ))}
+                {data.length === 0 ? (
+                  <Text className="font-bold text-center text-gray-500">
+                    Belum ada pembayaran
+                  </Text>
+                ) : (
+                  <>
+                    {data.map((item) => (
+                      <Cash
+                        price={item?.price}
+                        fullName={item?.fullName}
+                        package_={item?.package}
+                        id={item?.id}
+                        userId={item?.userId}
+                      />
+                    ))}
+                  </>
+                )}
               </View>
             </>
           ) : (
             <>
               <View>
-                {data.map((item) => (
-                  <Transfer
-                    price={item?.price}
-                    fullName={item?.fullName}
-                    package_={item?.package}
-                    proofOfTransferImage={item?.urlImage}
-                    id={item?.id}
-                    userId={item?.userId}
-                  />
-                ))}
+                {data.length === 0 ? (
+                  <Text className="font-bold text-center text-gray-500">
+                    Belum ada pembayaran
+                  </Text>
+                ) : (
+                  <>
+                    {data.map((item) => (
+                      <Transfer
+                        price={item?.price}
+                        fullName={item?.fullName}
+                        package_={item?.package}
+                        proofOfTransferImage={item?.urlImage}
+                        id={item?.id}
+                        userId={item?.userId}
+                      />
+                    ))}
+                  </>
+                )}
               </View>
             </>
           )}

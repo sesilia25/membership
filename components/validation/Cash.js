@@ -10,7 +10,6 @@ const Cash = ({ fullName, price, package_, id, userId }) => {
     setIsValidation(!isValidation);
   };
   const firestore = getFirestore(app);
-  // "MEMBER 6 BULAN"
   const handleValidation = async () => {
     try {
       // Update Firestore document
@@ -18,7 +17,6 @@ const Cash = ({ fullName, price, package_, id, userId }) => {
         isValid: "CORRECT", // Change 'validated' to the appropriate field in your document
       });
 
-      // Get the current user document
       const userDocRef = doc(firestore, "users", userId);
       const userDocSnap = await getDoc(userDocRef);
 
@@ -33,7 +31,6 @@ const Cash = ({ fullName, price, package_, id, userId }) => {
         month = 12;
       }
 
-      // Check if dateMember is not null before updating
       const timestamp = userDocSnap.data().dateMember;
       const dateMember = timestamp ? timestamp.toDate() : null;
 

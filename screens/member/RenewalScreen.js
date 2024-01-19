@@ -55,17 +55,18 @@ export default function RenewalScreen() {
     let downloadURL = null;
 
     if (proofOfTransfer === "TRANSFER" && proofOfTransferImage) {
-      // Generate a unique identifier (timestamp in this case)
       const timestamp = new Date().getTime();
-
       const storageRef = ref(storage, `proofOfTransferImages/${timestamp}`);
-      const response = await uploadBytes(storageRef, proofOfTransferImage);
-      await getDownloadURL(response.ref).then((url) => {
-        downloadURL = url;
-      });
+
+      try {
+        const response = await uploadBytes(storageRef, proofOfTransferImage);
+        downloadURL = await getDownloadURL(response.ref);
+      } catch (error) {
+        console.error("Error uploading proof of transfer image:", error);
+      }
     }
 
-    await addTransaction({
+    const transactionData = {
       userId: user.uid,
       fullName: user.fullName,
       price: calculatePrice(selectedPackage),
@@ -73,8 +74,16 @@ export default function RenewalScreen() {
       proofOfTransfer: proofOfTransfer,
       urlImage: downloadURL,
       isValid: "PENDING",
-    });
+    };
+
+    try {
+      await addTransaction(transactionData);
+      navigation.goBack();
+    } catch (error) {
+      console.error("Error adding transaction:", error);
+    }
   };
+
   return (
     <View
       className="flex-1 bg-white"
@@ -102,8 +111,8 @@ export default function RenewalScreen() {
       >
         <ScrollView>
           <View className="space-y-1 form">
-            <Text className="ml-4 text-gray-700">Perpanjangan</Text>
-            <Text className="mb-3 ml-4 text-gray-700">Pilihan Paket</Text>
+            <Text className="text-gray-700 ">Perpanjangan</Text>
+            <Text className="mb-3 text-gray-700">Pilihan Paket</Text>
             <Dropdown
               className="p-4 text-gray-700 bg-gray-100 rounded-2xl mb-7"
               placeholder="Silihkan pilih paket"
@@ -117,7 +126,7 @@ export default function RenewalScreen() {
               onValueChange={(itemValue) => setSelectedPackage(itemValue)}
               selectedValue={selectedPackage}
             />
-            <Text className="mb-3 ml-4 text-gray-700">Metode Pembayaran</Text>
+            <Text className="mb-3 text-gray-700">Metode Pembayaran</Text>
             <Dropdown
               className="p-4 text-gray-700 bg-gray-100 rounded-2xl mb-7"
               placeholder="Metode Pembayaran"
@@ -135,7 +144,7 @@ export default function RenewalScreen() {
                   source={require("../../assets/images/signup.png")}
                   style={{ width: 165, height: 110 }}
                 />
-                <Text className="ml-4 text-gray-700">Bukti Transfer</Text>
+                <Text className="text-gray-700 ">Bukti Transfer</Text>
                 <TextInput
                   className="p-4 mb-3 text-gray-700 bg-gray-100 rounded-2xl"
                   value="sesil@gmail.com"

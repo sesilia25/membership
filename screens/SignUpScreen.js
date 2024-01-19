@@ -227,6 +227,9 @@ export default function SignUpScreen() {
             />
             {proofOfTransfer === "TRANSFER" && (
               <>
+                <Text className="mb-3 text-3xl text-gray-700">
+                  BCA: XXXXXXXX
+                </Text>
                 <Text className="mb-3 text-gray-700">Bukti Transfer</Text>
                 <TouchableOpacity
                   onPress={() => selectProofOfTransferImage()}
