@@ -15,7 +15,9 @@ export default function HistoryScreen() {
         id: doc.id,
         ...doc.data(),
       }));
+
       const filteredData = data.filter((item) => item.isValid === "CORRECT");
+      console.log(filteredData);
       setData(filteredData);
     } catch (error) {
       console.error("Error fetching users: ", error);
@@ -33,7 +35,10 @@ export default function HistoryScreen() {
       </SafeAreaView>
       <View className="flex mt-2 space-y-2">
         {data.map((item) => (
-          <View className="flex-row justify-between p-4 items-center border-[1px] border-gray-600 rounded-md">
+          <View
+            key={item?.id}
+            className="flex-row justify-between p-4 items-center border-[1px] border-gray-600 rounded-md"
+          >
             <View>
               <Text className="font-semibold">{item.fullName}</Text>
               <Text className="mt-2">{item.price}</Text>

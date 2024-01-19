@@ -23,7 +23,7 @@ export default function ValidationScreen() {
       }));
       const filter = isCash ? "CASH" : "TRANSFER";
       const filteredData = data.filter(
-        (item) => item.proofOfTransfer === filter
+        (item) => item.proofOfTransfer === filter && item.isValid === "PENDING"
       );
       setData(filteredData);
     } catch (error) {
@@ -32,6 +32,7 @@ export default function ValidationScreen() {
     }
   };
 
+  console.log(data);
   useEffect(() => {
     fetchData();
   }, [firestore, isCash]);
@@ -82,6 +83,8 @@ export default function ValidationScreen() {
                     price={item?.price}
                     fullName={item?.fullName}
                     package_={item?.package}
+                    id={item?.id}
+                    userId={item?.userId}
                   />
                 ))}
               </View>
@@ -95,6 +98,8 @@ export default function ValidationScreen() {
                     fullName={item?.fullName}
                     package_={item?.package}
                     proofOfTransferImage={item?.urlImage}
+                    id={item?.id}
+                    userId={item?.userId}
                   />
                 ))}
               </View>

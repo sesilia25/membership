@@ -9,21 +9,72 @@ import {
 } from "react-native";
 import { themeColors } from "../../theme";
 import { SafeAreaView } from "react-native-safe-area-context";
-import {
-  ArrowLeftIcon,
-  InformationCircleIcon,
-} from "react-native-heroicons/solid";
+import { ArrowLeftIcon } from "react-native-heroicons/solid";
 import { useNavigation } from "@react-navigation/native";
 import Dropdown from "react-native-input-select";
+import { useAuthContext } from "../../context/useContext";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  doc,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+
+const addTransaction = async (transactionData) => {
+  const db = getFirestore();
+  const transactionRef = collection(db, "transactions");
+
+  try {
+    await addDoc(transactionRef, transactionData);
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 export default function RenewalScreen() {
+  const { user, clearUser } = useAuthContext();
   const navigation = useNavigation();
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [proofOfTransfer, setProofOfTransfer] = useState("");
 
+  const calculatePrice = (packageType) => {
+    const prices = {
+      "MEMBER 1 BULAN": "325000",
+      "MEMBER 3 BULAN": "900000",
+      "MEMBER 6 BULAN": "1700000",
+      "MEMBER 12 BULAN": "3000000",
+    };
+
+    return prices[packageType] || "0";
+  };
+
+  const handleRenewal = async () => {
+    let downloadURL = null;
+
+    if (proofOfTransfer === "TRANSFER" && proofOfTransferImage) {
+      // Generate a unique identifier (timestamp in this case)
+      const timestamp = new Date().getTime();
+
+      const storageRef = ref(storage, `proofOfTransferImages/${timestamp}`);
+      const response = await uploadBytes(storageRef, proofOfTransferImage);
+      await getDownloadURL(response.ref).then((url) => {
+        downloadURL = url;
+      });
+    }
+
+    await addTransaction({
+      userId: user.uid,
+      fullName: user.fullName,
+      price: calculatePrice(selectedPackage),
+      package: selectedPackage,
+      proofOfTransfer: proofOfTransfer,
+      urlImage: downloadURL,
+      isValid: "PENDING",
+    });
+  };
   return (
     <View
       className="flex-1 bg-white"
@@ -57,8 +108,10 @@ export default function RenewalScreen() {
               className="p-4 text-gray-700 bg-gray-100 rounded-2xl mb-7"
               placeholder="Silihkan pilih paket"
               options={[
-                { label: "Transfer", value: "TRANSFER" },
-                { label: "Cash", value: "CASH" },
+                { label: "Member 1 bulan", value: "MEMBER 1 BULAN" },
+                { label: "Member 3 bulan", value: "MEMBER 3 BULAN" },
+                { label: "Member 6 bulan", value: "MEMBER 6 BULAN" },
+                { label: "Member 12 bulan", value: "MEMBER 12 BULAN" },
               ]}
               primaryColor={"green"}
               onValueChange={(itemValue) => setSelectedPackage(itemValue)}
@@ -67,14 +120,14 @@ export default function RenewalScreen() {
             <Text className="mb-3 ml-4 text-gray-700">Metode Pembayaran</Text>
             <Dropdown
               className="p-4 text-gray-700 bg-gray-100 rounded-2xl mb-7"
-              placeholder="Silihkan pilih paket"
+              placeholder="Metode Pembayaran"
               options={[
                 { label: "Transfer", value: "TRANSFER" },
                 { label: "Cash", value: "CASH" },
               ]}
               primaryColor={"green"}
-              onValueChange={(itemValue) => setSelectedPackage(itemValue)}
-              selectedValue={selectedPackage}
+              onValueChange={(itemValue) => setProofOfTransfer(itemValue)}
+              selectedValue={proofOfTransfer}
             />
             {selectedPackage === "TRANSFER" && (
               <>
@@ -90,7 +143,10 @@ export default function RenewalScreen() {
                 />
               </>
             )}
-            <TouchableOpacity className="py-3 bg-yellow-400 rounded-xl">
+            <TouchableOpacity
+              onPress={handleRenewal}
+              className="py-3 bg-yellow-400 rounded-xl"
+            >
               <Text className="font-bold text-center text-gray-700 uppercase font-xl">
                 Perpanjang
               </Text>

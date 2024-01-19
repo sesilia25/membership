@@ -45,22 +45,45 @@ export default function HomeMemberScreen() {
     }
   };
 
+  let formattedDate;
+  console.log(user?.dateMember);
+  if (user?.dateMember === null) {
+    formattedDate = "-";
+  } else {
+    // Membuat objek Date dengan menggunakan timestamp
+    const date = new Date(
+      user.dateMember?.seconds * 1000 + user.dateMember?.nanoseconds / 1e6
+    );
+
+    // Mendapatkan tanggal dalam format tertentu, misalnya ISO string
+    const dateString = date.toISOString();
+    // Membuat objek Date dari timestamp string
+    const timestampDate = new Date(dateString);
+
+    // Mendapatkan tanggal dalam format "YYYY-MM-DD"
+    formattedDate = `${timestampDate.getFullYear()}-${(
+      timestampDate.getMonth() + 1
+    )
+      .toString()
+      .padStart(2, "0")}-${timestampDate
+      .getDate()
+      .toString()
+      .padStart(2, "0")}`;
+  }
+
   return (
     <View className="flex-1 bg-white">
       <SafeAreaView>
         <View className="p-4 ">
           <Text className="mb-4 text-xl font-bold">Beranda</Text>
           {user && (
-            <View className="flex flex-row justify-between p-4 border-2">
+            <View className="flex flex-row justify-between p-4 border-[1px] rounded-md">
               <View>
                 <Text className="text-lg">{user?.fullName}</Text>
                 <Text className="text-lg">
                   {user?.dateMember === null ? "Belum Aktif" : "Aktif"}
                 </Text>
-                <Text className="text-lg">
-                  {" "}
-                  {user?.dateMember === null ? "-" : user?.dateMember}
-                </Text>
+                <Text className="text-lg">{formattedDate}</Text>
               </View>
               <View>
                 <Image
